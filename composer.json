@@ -1,0 +1,35 @@
+{
+    "name": "maestriam/hiker",
+    "description": "Create awsome themes for your Laravel projects.",
+    "type": "library",
+    "license": "GPL-3.0",
+    "require-dev": {
+        
+    },
+    "authors": [
+        {
+            "name": "Giuliano Sampaio", 
+            "email": "giuguitar@gmail.com"
+        }
+    ],
+    "require": {
+        "laravel/framework": "^6.0"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Maestriam\\Hiker\\Tests\\": "tests/"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Maestriam\\Hiker\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+          "providers": [
+            "Maestriam\\Hiker\\Providers\\MainServiceProvider"
+          ]
+        }
+    }
+}
