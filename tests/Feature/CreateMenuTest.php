@@ -19,12 +19,17 @@ class CreateMenuTest extends TestCase
         $response = $this->get('/');    
 
         $this->hiker()
-                     ->menu('sidebar')
-                     ->push('home')
-                     ->get();
+             ->menu('sidebar')
+             ->push('home')
+             ->push('blog.index')
+             ->push('blog.store')
+             ->get();
 
         $menu = $this->hiker()->menu('sidebar')->get(); 
 
-        dd($menu);
+        foreach($menu as $route) {
+            $this->assertIsString($route->url);
+        }
     }
+
 }

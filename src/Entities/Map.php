@@ -33,6 +33,39 @@ class Map
     }
 
     /**
+     * Retorna todos as  
+     *
+     * @param string $exp
+     * @return array
+     */
+    public function readMenu(string $reg) : array
+    {
+        $finded  = [];
+        $type    = 'menu';
+        $pattern = sprintf('/%s./', $reg);
+
+        foreach($this->all() as $source) {
+            
+            $actions = $source->getAction('hiker');
+        
+            if (! $actions || ! isset($actions[$type])) {
+                continue;
+            }
+
+            foreach ($actions[$type] as $key => $action) {
+
+                if (! preg_match($pattern, $key)) {
+                    continue;
+                }
+
+                $finded[] = $key;
+            }
+        }
+
+        return $finded;
+    }
+
+    /**
      * Retorna todas as rotas que possuem uma determinada 
      * propriedade registrada em suas actions
      *

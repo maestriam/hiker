@@ -7,8 +7,12 @@ use Illuminate\Routing\Route as RouteSource;
 class Route
 {
     private $source;
+    
+    private  $url;
 
     private $label;
+
+    private $order;
     
     /**
      * Instância 
@@ -18,18 +22,35 @@ class Route
     public function __construct(RouteSource $source = null, string $label = null)
     {
         $this->setSource($source)
-             ->load()
-             ->setLabel($label);
+             ->loadBasic()
+             ->label($label);
+    }
+
+    public function __get($name)
+    {
+        if ($name == 'url') {
+            return $this->url;
+        }
+        
+        elseif($name == 'label') {
+            return $this->label;
+        }
+
+        elseif($name == 'order') {
+            return $this->order;
+        }
     }
 
     /**
-     * Carrega as informações das rotas no objeto
+     * Carrega as informações básicas das rota no objeto
      *
      * @return Menu
      */
-    private function load() : Route
+    private function loadBasic() : Route
     {
         $actions = $this->source->getAction();
+        
+        $this->url = route($actions['as']);
         
         if (! isset($actions['hiker']['route'])) {
             return $this;
@@ -38,6 +59,7 @@ class Route
         $props = $actions['hiker']['route']; 
         
         $this->label = $props['label'];
+
         return $this;
     }
 
@@ -59,12 +81,39 @@ class Route
     }
 
     /**
+     * Undocumented function
+     *
+     * @param string $name
+     * @return void
+     */
+    public function loadMenu(string $name)
+    {
+        $attrs = $this->actions('menu', $name);
+
+        $this->order = $attrs['order'];
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param string $type
+     * @param string $name
+     * @return void
+     */
+    private function actions(string $type, string $name)
+    {
+        $actions = $this->source->getAction();
+
+        return $actions['hiker'][$type][$name] ?? null;
+    }
+
+    /**
      * Define o nome que será exibido no
      *
      * @param string $name
      * @return void
      */
-    private function setLabel(string $name = null)
+    public function label(string $name = null)
     {
         if (! strlen($name)) {
             return $this;
