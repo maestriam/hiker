@@ -2,10 +2,14 @@
 
 namespace Maestriam\Hiker\Entities;
 
+use Maestriam\Samurai\Models\Foundation;
 use Illuminate\Routing\Route as RouteSource;
+use Maestriam\Hiker\Traits\Entities\SelfKnowledge;
 
-class Route
+class Route extends Foundation
 {
+    use SelfKnowledge;
+
     private $source;
     
     private  $url;

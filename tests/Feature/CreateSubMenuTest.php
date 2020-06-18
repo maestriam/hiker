@@ -12,35 +12,34 @@ class CreateSubMenuTest extends TestCase
 
     public function testCreateSubMenu()
     {
-        Route::get('/',            ['as' => 'home']);
-        Route::get('/blog',        ['as' => 'blog.index']);
-        Route::get('/blog/create', ['as' => 'blog.create']);
-        Route::get('/blog/search', ['as' => 'blog.search']);
-        Route::post('/blog',       ['as' => 'blog.store']);
+        Route::get('/',      ['as' => 'home']);
+        Route::get('/blog',  ['as' => 'blog.index']);
+        Route::get('/theme', ['as' => 'theme.index']);
+        Route::post('/blog', ['as' => 'blog.store']);
 
-        // $home = $this->hiker()->menu('sidebar');
+        $this->hiker()
+             ->menu('sidebar')
+             ->push('blog.index')
+             ->sub('blog')
+             ->push('blog.index')
+             ->push('blog.store')
+             ->back()
+             ->sub('theme')
+             ->push('theme.index')
+             ->back();
 
-        // $menu1 = $this->hiker()
-        //               ->menu('home')
-        //               ->push('blog.index') 
-        //               ->push('blog.create')
-        //               ->toArray();
-        
-        $menu2 = $this->hiker()
-                      ->menu('blog')
-                      ->push('home')
-                      ->submenu('main')
-                      ->push('blog.index')
-                      ->push('blog.create')
-                      ->submenu('options')
-                      ->push('blog.search')
-                      ->push('blog.store')
-                      ->menu()
-                      ->push('blog.store')
-                      ->toArray();
-                    //  ->push('blog.search');
-                     //->toArray();
+        $menu = $this->hiker()->menu('sidebar')->get();
 
-            
+        foreach($menu->collection as $item) {
+
+            if (! $item->isMenu()) {
+                dump($item->url);
+                continue;
+            }
+
+            foreach ($item->collection as $subitem) {
+                dump($subitem->url);
+            }
+        }
     }
 }

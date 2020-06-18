@@ -3,17 +3,14 @@
 namespace Maestriam\Hiker\Entities;
 
 use Maestriam\Hiker\Entities\Map;
+use Maestriam\Hiker\Entities\Foundation;
+use Maestriam\Hiker\Traits\Entities\SelfKnowledge;
 use Maestriam\Hiker\Exceptions\RouteNotFoundException;
 use Maestriam\Hiker\Exceptions\InvalidMenuNameException;
 
-class Menu
+class Menu extends Foundation
 {
-    /**
-     * RNs de pesquisa de rotas e menus
-     *
-     * @var Map
-     */
-    private $map;
+    use SelfKnowledge;
 
     /**
      * Nome do menu
@@ -23,222 +20,245 @@ class Menu
     private $name = '';
 
     /**
-     * Indica qual é o menu que está sendo utilizado
-     * para adicionar rotas, no momento 
-     *
-     * @var string
-     */
-    private $current = '';
-    
-    /**
-     * Indica quais são os menus que são vinculados 
+     * Coleção de rotas e sub-menus 
      *
      * @var array
      */
-    private $links = [];
+    private $collection = [];
 
     /**
-     * Indica quais os submenus de um menu
+     * Define qual será o menu-pai (em caso de sub-menu)
      *
-     * @var array
+     * @var Menu
      */
-    private $submenus = [];
-    
-    /**
-     * Indica quais são as rotas do menu
-     *
-     * @var array
-     */
-    private $routes = [];
+    private $parent = null;
 
     /**
-     * Inicializa os atributos principais para trabalhar 
-     * com menus 
+     * Inicializa os atributos principais
      *
      * @param string $name
+     * @param Menu $parent
      */
-    public function __construct(string $name = null)
+    public function __construct(string $name, Menu $parent = null)
     {
-        $this->setMap()
-             ->setName($name)
-             ->setCurrent()
-             ->loadRoutes()
-             ->loadSubmenus();
+        return $this->setName($name)
+                    ->setParent($parent)
+                    ->load();
+                    
+    }
+    
+    /**
+     * Atalho para resgate de atributos
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public function __get(string $key)
+    {
+        if ($key == 'name') {
+            return $this->getName();
+        }
+        
+        elseif($key == 'collection') {
+            return $this->getCollection();
+        }
+
+        return null;
     }
 
     /**
-     * Define o nome do menu que será trabalhado
+     * Retorna o nome do menu em questão
+     *
+     * @return string
+     */
+    private function getName() : string
+    {
+        return $this->name;
+    }
+
+    /**
+     * Retorna a coleção de rotas e submenus
+     *
+     * @return array
+     */
+    private function getCollection() : array
+    {
+        return $this->collection;
+    }
+    
+    /**
+     * Define o nome do menu
      *
      * @param string $name
      * @return Menu
      */
     private function setName(string $name) : Menu
     {
-        if (strlen($name) == 0) {
-            throw new InvalidMenuNameException();
-        } 
-
         $this->name = $name;
         return $this;
     }
 
     /**
-     * Inicializa o objeto com as regras de negócio
-     * de pesquisa de rotas e menus
+     * Define o menu-pai do menu
      *
+     * @param Menu $parent
      * @return Menu
      */
-    private function setMap() : Menu
+    private function setParent($parent = null) : Menu
     {
-        if (! $this->map) {
-            $this->map = new Map();
+        if (! $parent) {
+            return $this;
         }
-    
+
+        if (is_string($parent)) {
+            $parent = new Menu($parent);
+        }
+
+        $this->parent = $parent;
         return $this;
     }
 
     /**
-     * Carrega todos os submneus atributos ao menu principal
-     *
-     * @return Menu
-     */
-    private function loadSubmenus() : Menu
-    {
-        // $submenus = $this->map->readMenu($this->name);
-
-        // if (empty($submenus)) {
-        //     return $this;
-        // }
-
-        // foreach ($submenus as $submenu) {
-
-        //     $sub = new Menu($submenu);
-        //     $this->submenus[] = $sub;
-
-        //     $x = $sub->toArray();
-
-        //     dump($x);
-        // }
-
-        return $this;
-    }
-
-    /**
-     * Carrega todas as rotas pertences ao menu
-     *
-     * @return Menu
-     */
-    private function loadRoutes() : Menu
-    {
-        // $routes = $this->map->groupedBy('menu', $this->name);
-
-        // if (! $routes) {
-        //     return $this;
-        // }
-
-        // foreach($routes as $route) {
-        //     $this->routes[] = $route;
-        // }
-
-        return $this;
-    }
-
-    /**
-     * Define um novo submenu para o menu
+     * Cria uma nova instância de menu
+     * para gerar um sub-menu
      *
      * @param string $name
-     * @return void
+     * @return Menu
      */
-    public function submenu(string $name)
+    public function sub(string $name) : Menu
     {
-        // if (! in_array($name, $this->submenus)) {
-        //     $this->submenu[] = $name;
-        // }
+        $name   = $this->name . '.' . $name; 
+        $finded = $this->find($name);
+        
+        if ($finded) {
+            return $finded;
+        }
+        
+        $submenu = new Menu($name, $this);
+        
+        $this->stack($submenu);
 
-        $this->setCurrent($name);
-
-        return $this;
+        return $submenu;
     }
 
     /**
-     * Retorna a lista de todos os submenus
+     * Retorna um submenu pelo nome
      *
-     * @return array
+     * @param string $name
+     * @return Menu|null
      */
-    public function submenus() : array
+    private function find(string $name) : ?Menu
     {
-        return $this->submenus;
-    }
+        foreach($this->collection as $item) {
+
+            if (! $item->isMenu()) {
+                continue;
+            }
+
+            if ($item->name == $name) {
+                return $item;
+            }
+        }
+
+        return null;
+    } 
 
     /**
-     * Adiciona uma nova rota para o menu
+     * Adiciona uma nova rota na coleção do menu
      *
      * @param string $name
      * @return Menu
      */
     public function push(string $name) : Menu
     {
-        $route = $this->map->find($name);
+        $route = $this->map()->find($name);
 
         if (! $route) {
             throw new RouteNotFoundException();
         }
 
         $this->stack($route);
-        
+
         return $this;
     }
-    
+
     /**
-     * Registra e coloca uma nova rota na pilha de um menu/submenu
+     * Adiciona um novo item na coleção
      *
-     * @param Route $route
+     * @param mixed $item
      * @return Menu
      */
-    private function stack(Route $route) : Menu
+    private function stack($item) : Menu
     {
-        $value = [$this->current => $route];
+        $this->collection[] = $item;
 
-        $this->routes[] = $value;
-        
-        $key = array_search($value, $this->routes);
-        
-        $attrs = ['order' => $key];
-        
-        $route->register('menu', $this->current, $attrs);
+        $this->save();
 
         return $this;
     }
 
     /**
-     * Define qual será que o menu que s
+     * Salva o status atual do menu no cache
      *
-     * @return string
+     * @return void
      */
-    private function setCurrent(string $name = null) : Menu
-    {
-        $current = (! $name) ? $this->name : 
-                               $this->name . '.' . $name;
+    private function save()
+    {        
+        $name = ($this->parent) ? $this->parent->getName() : null;
 
-        $this->current = $current;
+        $val = [
+            'parent'     => $name,
+            'collection' => $this->collection, 
+        ];
 
+        $this->cache('menu')->store($this->name, $val);
+        
         return $this;
     }
 
-    public function menu()
+    /**
+     * Carrega as informações salvas do cache sobre o menu
+     *
+     * @return void
+     */
+    private function load()
     {
-        $this->setCurrent();
-        return $this; 
+        $cache = $this->cache('menu')->get($this->name);
+        
+        $this->setCollection($cache['collection'])
+             ->setParent($cache['parent']);
+             
     }
 
-    public function toArray() 
+    public function get()
     {
-        foreach($this->routes as $route) {
+        return $this;
+    }
 
-            foreach ($route as $k => $v) {
-                
-                dump($k . '= '. $v->url);
-            }
+    /**
+     * Inicializa a coleção de rotas e sub-menus
+     *
+     * @param mixed $collection
+     * @return void
+     */
+    private function setCollection($collection) : Menu
+    {
+        if (! $collection) {
+            $collection = [];
         }
+
+        $this->collection = $collection;
+        return $this;
+    }
+
+    /**
+     * Retorna o menu-pai do menu
+     *
+     * @return Menu
+     */
+    public function back() : Menu 
+    {
+        $instance = $this->parent ?? $this; 
+        return $instance;
     }
 }
