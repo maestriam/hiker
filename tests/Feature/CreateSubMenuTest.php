@@ -3,8 +3,8 @@
 namespace Maestriam\Hiker\Tests\Feature;
 
 use Tests\TestCase;
-use Maestriam\Hiker\Traits\Hikeable;
 use Illuminate\Support\Facades\Route;
+use Maestriam\Hiker\Traits\Support\Hikeable;
 
 class CreateSubMenuTest extends TestCase
 {
@@ -18,28 +18,28 @@ class CreateSubMenuTest extends TestCase
         Route::post('/blog', ['as' => 'blog.store']);
 
         $this->hiker()
-             ->menu('sidebar')
+             ->menu('submenus')
              ->push('blog.index')
-             ->sub('blog')
+             ->next('blog')
              ->push('blog.index')
              ->push('blog.store')
              ->back()
-             ->sub('theme')
+             ->next('theme')
              ->push('theme.index')
              ->back();
 
-        $menu = $this->hiker()->menu('sidebar')->get();
+        $menu = $this->hiker()->menu('submenus')->get();
 
         foreach($menu->collection as $item) {
 
             if (! $item->isMenu()) {
-                dump($item->url);
-                continue;
-            }
-
-            foreach ($item->collection as $subitem) {
-                dump($subitem->url);
-            }
+                $this->assertIsString($item->url);
+            
+            } else {        
+                foreach ($item->collection as $subitem) {
+                    $this->assertIsString($subitem->url);
+                }
+            }            
         }
     }
 }

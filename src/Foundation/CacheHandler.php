@@ -29,7 +29,7 @@ class CacheHandler
      */
     public function subject(string $subject) : CacheHandler
     {
-        $this->subject = $subject;
+        $this->subject = $subject . '-';
         return $this;
     }
     
@@ -44,10 +44,10 @@ class CacheHandler
     public function store(string $key, $value) : bool
     {
         $key = $this->key($key);
-        
+       
         return Cache::put($key, $value); 
     }
-
+    
     /**
      * Retorna o valor do cache
      *
@@ -69,6 +69,6 @@ class CacheHandler
      */
     private function key(string $key) : string
     {
-        return $this->prefix . '-' . $this->subject . '-' . $key;
+        return $this->prefix . $this->subject . $key;
     }
 }

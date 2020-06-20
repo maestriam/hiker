@@ -2,15 +2,14 @@
 
 namespace Maestriam\Hiker\Entities;
 
-use Maestriam\Hiker\Entities\Map;
 use Maestriam\Hiker\Entities\Foundation;
 use Maestriam\Hiker\Traits\Entities\SelfKnowledge;
+use Maestriam\Hiker\Traits\Entities\MagicMethods;
 use Maestriam\Hiker\Exceptions\RouteNotFoundException;
-use Maestriam\Hiker\Exceptions\InvalidMenuNameException;
 
 class Menu extends Foundation
 {
-    use SelfKnowledge;
+    use SelfKnowledge, MagicMethods;
 
     /**
      * Nome do menu
@@ -44,7 +43,6 @@ class Menu extends Foundation
         return $this->setName($name)
                     ->setParent($parent)
                     ->load();
-                    
     }
     
     /**
@@ -55,15 +53,7 @@ class Menu extends Foundation
      */
     public function __get(string $key)
     {
-        if ($key == 'name') {
-            return $this->getName();
-        }
-        
-        elseif($key == 'collection') {
-            return $this->getCollection();
-        }
-
-        return null;
+        return $this->getAttribute($key);
     }
 
     /**
@@ -84,6 +74,14 @@ class Menu extends Foundation
     private function getCollection() : array
     {
         return $this->collection;
+    }
+
+    /**
+     * 
+     */
+    private function getParent() : ?Menu
+    {
+        return $this->parent;
     }
     
     /**
@@ -125,7 +123,7 @@ class Menu extends Foundation
      * @param string $name
      * @return Menu
      */
-    public function sub(string $name) : Menu
+    public function next(string $name) : Menu
     {
         $name   = $this->name . '.' . $name; 
         $finded = $this->find($name);
@@ -190,11 +188,54 @@ class Menu extends Foundation
      */
     private function stack($item) : Menu
     {
-        $this->collection[] = $item;
-
-        $this->save();
+        $this->add($item)->save();
 
         return $this;
+    }
+
+    /**
+     * Adiciona o item no array de coleção
+     *
+     * @param array $item
+     * @return void
+     */
+    private function add($item) : Menu
+    {
+        $this->collection[] = $item;
+        return $this;
+    }
+
+    /**
+     * Extrai os dados essênciais do menu e converte
+     * em array para armazamento em cache
+     *
+     * @param Menu $item
+     * @return array
+     */
+    private function mountMenu(Menu $item) : array
+    {
+        $parent = $this->getParent();
+
+        return [
+            'type'   => 'menu',
+            'name'   => $item->name,
+            'parent' => $parent->name ?? null
+        ];
+    }
+
+    /**
+     * Extrai os dados essênciais da rota e converte
+     * em array para armazamento em cache
+     * 
+     * @param Route $item
+     * @return array
+     */
+    private function mountRoute(Route $item) : array
+    {
+        return [
+            'type' => 'route',
+            'name' => $item->name,
+        ];
     }
 
     /**
@@ -204,16 +245,36 @@ class Menu extends Foundation
      */
     private function save()
     {        
-        $name = ($this->parent) ? $this->parent->getName() : null;
+        $array = $this->collectionToArray();
 
-        $val = [
-            'parent'     => $name,
-            'collection' => $this->collection, 
-        ];
+        $this->cache('menu')->store($this->name, $array);
 
-        $this->cache('menu')->store($this->name, $val);
-        
         return $this;
+    }
+
+    /**
+     * Retorna a forma fragmentada das informações
+     * dos objetos de rota e menu para array
+     *
+     * @return array
+     */
+    private function collectionToArray() : array
+    {
+        $value  = null;
+        $scraps = [];
+
+        foreach ($this->collection as $item) {
+                                    
+            if ($item instanceof Menu) {
+                $value = $this->mountMenu($item);        
+            } else {
+                $value = $this->mountRoute($item);
+            }
+
+            $scraps[] = $value;
+        }
+
+        return $scraps;
     }
 
     /**
@@ -224,13 +285,74 @@ class Menu extends Foundation
     private function load()
     {
         $cache = $this->cache('menu')->get($this->name);
-        
-        $this->setCollection($cache['collection'])
-             ->setParent($cache['parent']);
-             
+
+        if (empty($cache) || ! $cache) {
+            return null;
+        }
+
+        foreach ($cache as $item) {
+            $this->parse($item);
+        }
     }
 
-    public function get()
+    /**
+     * Interpreta as informações básicas do 
+     *
+     * @param array $item
+     * @return void
+     */
+    private function parse(array $item)
+    {
+        if ($item['type'] == 'menu') {
+            return $this->parseMenu($item);
+        }
+
+        return $this->parseRoute($item);
+    }
+
+    /**
+     * Interpreta as informações básicas da rota
+     * e converte em um objeto Route
+     *
+     * @param array $item
+     * @return void
+     */
+    private function parseRoute(array $item)
+    {
+        $name  = $item['name']; 
+        $route = $this->map()->find($name);
+
+        if (! $route) {
+            return null;
+        }
+
+        $this->add($route);
+    }
+
+    /**
+     * Interpreta as informações básicas do menu
+     * e converte em um objeto Menu
+     *
+     * @param array $item
+     * @return void
+     */
+    private function parseMenu(array $item)
+    {
+        $name   = $item['name'];
+        $parent = $item['parent'];
+        
+        $menu = new Menu($name);
+        $menu->setParent($parent);
+
+        $this->add($menu);
+    }
+
+    /**
+     * Retorna a instância com as propriedades definidas do menu
+     *
+     * @return Menu
+     */
+    public function get() : Menu
     {
         return $this;
     }
@@ -261,4 +383,4 @@ class Menu extends Foundation
         $instance = $this->parent ?? $this; 
         return $instance;
     }
-}
+} 

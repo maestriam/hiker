@@ -1,6 +1,6 @@
 <?php
 
-namespace Maestriam\Hiker\Traits;
+namespace Maestriam\Hiker\Traits\Support;
 
 use Maestriam\Hiker\Entities\Hiker;
 
@@ -13,7 +13,7 @@ trait Hikeable
 
     public function hiker()
     {
-        if(isset($hikerInstance)) {
+        if (isset($hikerInstance)) {
             return self::$hikerInstance;
         }
 

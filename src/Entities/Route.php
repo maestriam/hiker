@@ -5,128 +5,45 @@ namespace Maestriam\Hiker\Entities;
 use Maestriam\Samurai\Models\Foundation;
 use Illuminate\Routing\Route as RouteSource;
 use Maestriam\Hiker\Traits\Entities\SelfKnowledge;
+use Maestriam\Hiker\Traits\Entities\MagicMethods;
 
 class Route extends Foundation
 {
-    use SelfKnowledge;
+    use SelfKnowledge, MagicMethods;
 
+    /**
+     * Rota do Laralve
+     *
+     * @var RouteSource
+     */
     private $source;
-    
-    private  $url;
 
-    private $label;
-
-    private $order;
+    /**
+     * Apelido atribuído a rota
+     *
+     * @var string
+     */
+    private $name = '';
     
     /**
-     * Instância 
+     * Inicializa todos os atributos principais
      *
      * @param RouteSource $source
      */
     public function __construct(RouteSource $source = null, string $label = null)
     {
-        $this->setSource($source)
-             ->loadBasic()
-             ->label($label);
-    }
-
-    public function __get($name)
-    {
-        if ($name == 'url') {
-            return $this->url;
-        }
-        
-        elseif($name == 'label') {
-            return $this->label;
-        }
-
-        elseif($name == 'order') {
-            return $this->order;
-        }
+        $this->setSource($source)->load();
     }
 
     /**
-     * Carrega as informações básicas das rota no objeto
-     *
-     * @return Menu
-     */
-    private function loadBasic() : Route
-    {
-        $actions = $this->source->getAction();
-        
-        $this->url = route($actions['as']);
-        
-        if (! isset($actions['hiker']['route'])) {
-            return $this;
-        }
-
-        $props = $actions['hiker']['route']; 
-        
-        $this->label = $props['label'];
-
-        return $this;
-    }
-
-    /**
-     * Registra um valor nas propridades da Rota do Laravel
-     *
-     * @param string $col
-     * @param string $name
-     * @param mixed $value
-     * @return void
-     */
-    public function register(string $col, string $name, $value)
-    {
-        $actions = $this->source->getAction();
-
-        $actions['hiker'][$col][$name] = $value;
-
-        $this->source->setAction($actions);
-    }
-
-    /**
-     * Undocumented function
+     * Retorna um atributo do objeto
      *
      * @param string $name
-     * @return void
+     * @return mixed
      */
-    public function loadMenu(string $name)
+    public function __get(string $name)
     {
-        $attrs = $this->actions('menu', $name);
-
-        $this->order = $attrs['order'];
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param string $type
-     * @param string $name
-     * @return void
-     */
-    private function actions(string $type, string $name)
-    {
-        $actions = $this->source->getAction();
-
-        return $actions['hiker'][$type][$name] ?? null;
-    }
-
-    /**
-     * Define o nome que será exibido no
-     *
-     * @param string $name
-     * @return void
-     */
-    public function label(string $name = null)
-    {
-        if (! strlen($name)) {
-            return $this;
-        }
-
-        $this->register('route', 'label' , $name);
-
-        $this->label = $name;
-        return $this;
+        return $this->getAttribute($name);
     }
         
     /**
@@ -139,5 +56,60 @@ class Route extends Foundation
     {
         $this->source = $source;
         return $this;
+    }
+
+    /**
+     * Define o nome da rota no objeto
+     *
+     * @param string $name
+     * @return Route
+     */
+    private function setName($val = null) :  Route
+    {
+        if (is_array($val) && isset($val['as'])) {
+            $name = $val['as'];
+        }
+
+        $this->name = $name;
+        return $this;
+    }
+
+    /**
+     * Define a URL da rota
+     *
+     * @param string $url
+     * @return Route
+     */
+    private function setUrl($val = null) : Route
+    {
+        if (is_array($val) && isset($val['as'])) {
+            $url = route($val['as']);
+        }
+
+        $this->url = $url;
+        return $this;
+    }
+
+    /**
+     * Retorna o nome da rota 
+     *
+     * @return string
+     */
+    private function getName() : string
+    {
+        return $this->name; 
+    }
+
+    /**
+     * Carrega as informações principais vindas da 
+     * rota do Laravel
+     *
+     * @return void
+     */
+    private function load()
+    {
+        $actions = $this->source->getAction();
+
+        $this->setName($actions)->setUrl($actions);
     }
 }
