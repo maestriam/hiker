@@ -4,12 +4,12 @@ namespace Maestriam\Hiker\Entities;
 
 use Maestriam\Hiker\Entities\Foundation;
 use Maestriam\Hiker\Traits\Entities\SelfKnowledge;
-use Maestriam\Hiker\Traits\Entities\MagicMethods;
+use Maestriam\Hiker\Traits\Entities\CustomAttributes;
 use Maestriam\Hiker\Exceptions\RouteNotFoundException;
 
 class Menu extends Foundation
 {
-    use SelfKnowledge, MagicMethods;
+    use SelfKnowledge, CustomAttributes;
 
     /**
      * Nome do menu
@@ -39,10 +39,10 @@ class Menu extends Foundation
      * @param Menu $parent
      */
     public function __construct(string $name, Menu $parent = null)
-    {
-        return $this->setName($name)
-                    ->setParent($parent)
-                    ->load();
+    {   
+        $this->setName($name)
+             ->setParent($parent)
+             ->load();
     }
     
     /**
@@ -73,6 +73,8 @@ class Menu extends Foundation
      */
     private function getCollection() : array
     {
+        $this->cleanCache();
+
         return $this->collection;
     }
 
@@ -112,7 +114,7 @@ class Menu extends Foundation
             $parent = new Menu($parent);
         }
 
-        $this->parent = $parent;
+        $this->parent = $parent->get();
         return $this;
     }
 
@@ -125,7 +127,7 @@ class Menu extends Foundation
      */
     public function next(string $name) : Menu
     {
-        $name   = $this->name . '.' . $name; 
+        $name   = $this->name . '-' . $name; 
         $finded = $this->find($name);
         
         if ($finded) {
@@ -205,6 +207,8 @@ class Menu extends Foundation
         return $this;
     }
 
+
+
     /**
      * Extrai os dados essênciais do menu e converte
      * em array para armazamento em cache
@@ -212,15 +216,18 @@ class Menu extends Foundation
      * @param Menu $item
      * @return array
      */
-    private function mountMenu(Menu $item) : array
+    private function menuCapsule(Menu $item) : array
     {
         $parent = $this->getParent();
-
-        return [
-            'type'   => 'menu',
-            'name'   => $item->name,
-            'parent' => $parent->name ?? null
+        
+        $capsule = [
+            'type'       => 'menu',
+            'name'       => $item->name,    
+            'attributes' => $this->attributes,
+            'parent'     => $parent->name ?? null
         ];
+    
+        return $capsule;
     }
 
     /**
@@ -230,11 +237,14 @@ class Menu extends Foundation
      * @param Route $item
      * @return array
      */
-    private function mountRoute(Route $item) : array
+    private function routeCapsule(Route $item) : array
     {
+        $parent = $this->getParent();
+
         return [
-            'type' => 'route',
-            'name' => $item->name,
+            'type'       => 'route',
+            'attributes' => $this->attributes,
+            'name'       => $item->name,
         ];
     }
 
@@ -245,36 +255,53 @@ class Menu extends Foundation
      */
     private function save()
     {        
-        $array = $this->collectionToArray();
+        $cache = $this->encapsulate();  
 
-        $this->cache('menu')->store($this->name, $array);
+        $this->cache('menu')->update($this->name, $cache);
 
         return $this;
     }
 
     /**
-     * Retorna a forma fragmentada das informações
+     * Undocumented function
+     *
+     * @return array
+     */
+    private function encapsulate() : array
+    {
+        $collection = $this->collectionCapsule();
+
+        $parent = $this->getParent();
+
+        $capsule = [
+            'attributes' => $this->attributes,
+            'collection' => $collection
+        ];;
+
+        return $capsule;
+    }
+
+    /**
+     * Retorna a forma encapsulada das informações
      * dos objetos de rota e menu para array
      *
      * @return array
      */
-    private function collectionToArray() : array
+    private function collectionCapsule() : array
     {
-        $value  = null;
-        $scraps = [];
+        $capsule  = null;
+        $bottle  = [];
 
         foreach ($this->collection as $item) {
                                     
-            if ($item instanceof Menu) {
-                $value = $this->mountMenu($item);        
-            } else {
-                $value = $this->mountRoute($item);
-            }
+            $capsule = ($item instanceof Menu) ? 
+                        $this->menuCapsule($item) :
+                        $this->routeCapsule($item);
 
-            $scraps[] = $value;
+            $bottle[] = $capsule;
         }
 
-        return $scraps;
+        return $bottle;
     }
 
     /**
@@ -290,9 +317,44 @@ class Menu extends Foundation
             return null;
         }
 
-        foreach ($cache as $item) {
+        $this->loadCollection($cache['collection'])
+             ->loadAttributtes($cache['attributes']);
+        
+    }
+    
+    /**
+     * 
+     *
+     * @param array $collection
+     * @return void
+     */
+    private function loadCollection($collection) : Menu
+    {
+        if (empty($collection) || ! is_array($collection)) {
+            return $this;
+        }
+
+        foreach ($collection as $item) {
             $this->parse($item);
         }
+
+        return $this;
+    }
+
+    /**
+     * 
+     *
+     * @return void
+     */
+    private function loadAttributtes($attrs) : Menu
+    {
+        
+        if (empty($attrs) || ! is_array($attrs)) {
+            return $this;
+        }        
+        
+        $this->loadAttrs($attrs);
+        return $this;
     }
 
     /**
@@ -340,11 +402,28 @@ class Menu extends Foundation
     {
         $name   = $item['name'];
         $parent = $item['parent'];
+        $attrs  = $item['attributes'];
         
         $menu = new Menu($name);
         $menu->setParent($parent);
 
         $this->add($menu);
+    }
+
+    
+    /**
+     * Define valor de um atributo definido pelo usuário. 
+     * Se o usuário não passar o valor, retorna o valor definido.
+     *
+     * @param string $key
+     * @param string $value
+     * @return Menu
+     */
+    public final function attr(string $key, string $value) : Menu
+    {
+        $this->setCustomAttr($key, $value);
+        $this->save();
+        return $this;
     }
 
     /**
@@ -355,6 +434,16 @@ class Menu extends Foundation
     public function get() : Menu
     {
         return $this;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function cleanCache()
+    {
+        $this->cache('menu')->destroy($this->name);
     }
 
     /**

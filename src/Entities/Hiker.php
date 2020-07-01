@@ -2,6 +2,8 @@
 
 namespace Maestriam\Hiker\Entities;
 
+use Maestriam\Hiker\Entities\Menu;
+
 class Hiker
 {
     /**
@@ -9,9 +11,9 @@ class Hiker
      * de menu
      *
      * @param string $name
-     * @return void
+     * @return Menu
      */
-    public function menu(string $name)
+    public function menu(string $name) : Menu
     {
         return new Menu($name);
     }    

@@ -2,13 +2,14 @@
 
 namespace Maestriam\Hiker\Support;
 
-use Maestriam\Hiker\Entities\Hiker as Model;
+use Maestriam\Hiker\Entities\Menu;
+use Maestriam\Hiker\Entities\Hiker as HikerModel;
 
 class Hiker
 {
-    public static function menu(string $menu)
+    public static function menu(string $menu) : Menu
     {
-        $hiker = new Model();
+        $hiker = new HikerModel();
 
         return $hiker->menu($menu);
     }

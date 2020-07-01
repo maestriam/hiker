@@ -5,11 +5,11 @@ namespace Maestriam\Hiker\Entities;
 use Maestriam\Samurai\Models\Foundation;
 use Illuminate\Routing\Route as RouteSource;
 use Maestriam\Hiker\Traits\Entities\SelfKnowledge;
-use Maestriam\Hiker\Traits\Entities\MagicMethods;
+use Maestriam\Hiker\Traits\Entities\CustomAttributes;
 
 class Route extends Foundation
 {
-    use SelfKnowledge, MagicMethods;
+    use SelfKnowledge, CustomAttributes;
 
     /**
      * Rota do Laralve

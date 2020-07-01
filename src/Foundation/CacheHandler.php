@@ -44,7 +44,7 @@ class CacheHandler
     public function store(string $key, $value) : bool
     {
         $key = $this->key($key);
-       
+        
         return Cache::put($key, $value); 
     }
     
@@ -59,6 +59,33 @@ class CacheHandler
         $key = $this->key($key);
 
         return Cache::get($key);
+    }
+
+    /**
+     * 
+     *
+     * @param string $key
+     * @return void
+     */
+    public function destroy(string $key)
+    {
+        $key = $this->key($key);
+
+        $ret = Cache::forget($key);   
+    }
+    
+    /**
+     * 
+     *
+     * @param string $key
+     * @param mixed $value
+     * @return mixed
+     */
+    public function update(string $key, $value)
+    {
+        $this->destroy($key);
+
+        return $this->store($key, $value);
     }
 
     /**
