@@ -2,7 +2,6 @@
 
 namespace Maestriam\Hiker\Tests\Feature;
 
-use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 use Maestriam\Hiker\Entities\Menu;
 use Illuminate\Support\Facades\Route;
@@ -21,23 +20,11 @@ class CreateMenuTest extends TestCase
     public function testCreateMenu()
     {
         $menu = $this->hiker()
-                     ->menu('sidebar')
+                     ->menu('my-menu')
                      ->push('home')
                      ->push('blog.index')
                      ->push('blog.store')
                      ->get();
-
-        $this->success($menu);
-    }
-
-    /**
-     * Verifica se é possível resgatar 
-     *
-     * @return void
-     */
-    public function testRescueMenu()
-    {
-        $menu = $this->hiker()->menu('sidebar')->get();
 
         $this->success($menu);
     }
@@ -53,7 +40,6 @@ class CreateMenuTest extends TestCase
         $this->assertInstanceOf(Menu::class, $menu);
 
         $this->contestAttributes($menu);
-
         $this->assertIsString($menu->name);
         $this->assertIsArray($menu->collection);
         $this->assertCount(3, $menu->collection);   

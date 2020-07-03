@@ -21,7 +21,7 @@ class CreateSubMenuTest extends TestCase
              ->menu('submenus')
              ->push('blog.index')
              ->next('blog')
-             ->push('blog.index')
+             ->push('blog.xxx')
              ->push('blog.store')
              ->back()
              ->next('theme')
@@ -30,7 +30,14 @@ class CreateSubMenuTest extends TestCase
 
         $menu = $this->hiker()->menu('submenus')->get();
 
-        foreach($menu->collection as $item) {
+        $this->contestCollection($menu->collection);
+    }
+
+    public function contestCollection($collection)
+    {
+        $this->assertCount(3, $collection);
+
+        foreach($collection as $item) {
 
             if (! $item->isMenu()) {
                 $this->assertIsString($item->url);
