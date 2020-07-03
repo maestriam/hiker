@@ -2,12 +2,13 @@
 
 namespace Maestriam\Hiker\Entities;
 
-use Maestriam\Samurai\Models\Foundation;
+use Maestriam\Hiker\Contracts\Navigator;
+use Maestriam\Hiker\Entities\Foundation;
 use Illuminate\Routing\Route as RouteSource;
 use Maestriam\Hiker\Traits\Entities\SelfKnowledge;
 use Maestriam\Hiker\Traits\Entities\CustomAttributes;
 
-class Route extends Foundation
+class Route extends Foundation implements Navigator
 {
     use SelfKnowledge, CustomAttributes;
 
@@ -38,12 +39,12 @@ class Route extends Foundation
     /**
      * Retorna um atributo do objeto
      *
-     * @param string $name
+     * @param string $key
      * @return mixed
      */
-    public function __get(string $name)
+    public function __get(string $key)
     {
-        return $this->getAttribute($name);
+        return $this->getCustomAttribute($key);
     }
         
     /**

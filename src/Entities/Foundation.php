@@ -4,6 +4,8 @@ namespace Maestriam\Hiker\Entities;
 
 use Maestriam\Hiker\Foundation\RouteMapper;
 use Maestriam\Hiker\Foundation\CacheHandler;
+use Maestriam\Hiker\Foundation\CustomAttribute;
+use Maestriam\Hiker\Foundation\NavEncapsulator;
 
 class Foundation
 {
@@ -20,6 +22,20 @@ class Foundation
      * @var RouteMapper
      */
     private static $mapInstance = null;
+
+    /**
+     * Undocumented variable
+     *
+     * @var NavEncapsulator
+     */
+    private static $capsuleInstance = null;
+
+    /**
+     * Undocumented variable
+     *
+     * @var NavEncapsulator
+     */
+    private static $customInstance = null;
 
     /**
      * Retorna o singleton das RNs de cache
@@ -47,5 +63,33 @@ class Foundation
         }
 
         return self::$mapInstance;
+    }
+
+    /**
+     * Retorna o singleton das  RNs de encapsulamento de entidades
+     *
+     * @return NavEncapsulator
+     */
+    public function capsule() : NavEncapsulator
+    {
+        if (! self::$capsuleInstance) {
+            self::$capsuleInstance = new NavEncapsulator();
+        }
+
+        return self::$capsuleInstance;
+    }
+
+    /**
+     * Retorna o singleton das  RNs de atributos customizados
+     *
+     * @return CustomAttribute
+     */
+    public function custom() : CustomAttribute
+    {
+        if (! self::$customInstance) {
+            self::$customInstance = new CustomAttribute();
+        }
+
+        return self::$customInstance;
     }
 }
