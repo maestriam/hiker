@@ -296,6 +296,10 @@ class Menu extends Foundation implements Navigator
 
             $nav = $this->capsule()->expand($item);
 
+            if (! $nav) {
+                continue;
+            }
+
             if ($nav instanceof Menu) {
                 $nav->setParent($this);
             }

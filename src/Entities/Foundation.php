@@ -17,25 +17,25 @@ class Foundation
     private static $cacheInstance = null;
 
     /**
-     * Instância de route
+     * Pesquisa de rotas
      *
      * @var RouteMapper
      */
     private static $mapInstance = null;
 
     /**
-     * Undocumented variable
+     * Instancia de conversão de array/objeto
      *
      * @var NavEncapsulator
      */
     private static $capsuleInstance = null;
 
     /**
-     * Undocumented variable
+     * Atributos personalizados
      *
      * @var NavEncapsulator
      */
-    private static $customInstance = null;
+    private static $customInstance = [];
 
     /**
      * Retorna o singleton das RNs de cache
@@ -86,10 +86,10 @@ class Foundation
      */
     public function custom() : CustomAttribute
     {
-        if (! self::$customInstance) {
-            self::$customInstance = new CustomAttribute();
+        if (! isset(self::$customInstance[$this->name])) {
+            self::$customInstance[$this->name] = new CustomAttribute();
         }
 
-        return self::$customInstance;
+        return self::$customInstance[$this->name];
     }
 }

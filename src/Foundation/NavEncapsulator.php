@@ -120,7 +120,7 @@ class NavEncapsulator
      * @param array $capsule
      * @return Navigator
      */
-    public function expand(array $capsule) : Navigator
+    public function expand(array $capsule) : ?Navigator
     {
         if ($capsule['type'] == 'route') {
             return $this->parseRoute($capsule);
@@ -152,9 +152,7 @@ class NavEncapsulator
      */
     private function parseMenu(array $item) : Menu
     {
-        $name   = $item['name'];
-        $attrs  = $item['attributes'];
-
+        $name = $item['name'];
         $menu = new Menu($name);
 
         return $menu;
