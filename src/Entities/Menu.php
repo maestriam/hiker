@@ -184,9 +184,9 @@ class Menu extends Foundation implements Navigator
      * @param string $name
      * @return Menu
      */
-    public function push(string $name) : Menu
+    public function push(string $name, array $params = []) : Menu
     {
-        $route = $this->map()->find($name);
+        $route = $this->map()->find($name, $params);
 
         if (! $route) {
             throw new RouteNotFoundException();
@@ -295,10 +295,6 @@ class Menu extends Foundation implements Navigator
         foreach ($collection as $item) {
 
             $nav = $this->capsule()->expand($item);
-
-            if (! $nav) {
-                continue;
-            }
 
             if ($nav instanceof Menu) {
                 $nav->setParent($this);

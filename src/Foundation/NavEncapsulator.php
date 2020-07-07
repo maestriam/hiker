@@ -3,9 +3,9 @@
 namespace Maestriam\Hiker\Foundation;
 
 use Maestriam\Hiker\Entities\Menu;
-use Maestriam\Hiker\Entities\Map;
 use Maestriam\Hiker\Entities\Route;
 use Maestriam\Hiker\Contracts\Navigator;
+use Maestriam\Hiker\Foundation\RouteMapper;
 
 /**
  * Classe responsável por encapsular/descapsular os objetos 
@@ -27,21 +27,22 @@ class NavEncapsulator
     }
 
     /**
-     * Undocumented function
+     * Retorna a instância com as RN's de pesquisa de rota
      *
      * @return Map
      */
-    private function map() : Map
+    private function map() : RouteMapper
     {
         if ($this->mapInstance == null) {
-            $this->mapInstance = new Map();
+            $this->mapInstance = new RouteMapper();
         }
 
         return $this->mapInstance;
     }
 
     /**
-     * Undocumented function
+     * Retorna o array com as informações principais do 
+     * menu
      *
      * @return array
      */
@@ -110,6 +111,7 @@ class NavEncapsulator
         return [
             'type'       => 'route',
             'name'       => $item->name,
+            'params'     => $item->params,
             'attributes' => $item->attributes,
         ];
     }
@@ -138,10 +140,10 @@ class NavEncapsulator
      */
     private function parseRoute(array $item) : ?Route
     {
-        $name  = $item['name']; 
-        $route = $this->map()->find($name);
+        $name   = $item['name']; 
+        $params = $item['params'] ?? [];
 
-        return $route;
+        return $this->map()->find($name, $params);
     }
 
     /**
@@ -153,8 +155,7 @@ class NavEncapsulator
     private function parseMenu(array $item) : Menu
     {
         $name = $item['name'];
-        $menu = new Menu($name);
 
-        return $menu;
+        return new Menu($name);
     }
 }

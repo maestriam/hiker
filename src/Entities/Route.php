@@ -20,6 +20,13 @@ class Route extends Foundation implements Navigator
     private $source;
 
     /**
+     * Undocumented variable
+     *
+     * @var array
+     */
+    private $params = [];
+
+    /**
      * Apelido atribuído a rota
      *
      * @var string
@@ -31,9 +38,11 @@ class Route extends Foundation implements Navigator
      *
      * @param RouteSource $source
      */
-    public function __construct(RouteSource $source = null, string $label = null)
+    public function __construct(RouteSource $source = null, array $params = [])
     {
-        $this->setSource($source)->load();
+        $this->setSource($source)
+             ->setParams($params)
+             ->load();
     }
 
     /**
@@ -60,6 +69,18 @@ class Route extends Foundation implements Navigator
     }
 
     /**
+     * Undocumented function
+     *
+     * @param array $params
+     * @return Route
+     */
+    private function setParams(array $params) : Route
+    {
+        $this->params = $params;
+        return $this;
+    }
+
+    /**
      * Define o nome da rota no objeto
      *
      * @param string $name
@@ -81,13 +102,9 @@ class Route extends Foundation implements Navigator
      * @param string $url
      * @return Route
      */
-    private function setUrl($val = null) : Route
-    {
-        if (is_array($val) && isset($val['as'])) {
-            $url = route($val['as']);
-        }
-
-        $this->url = $url;
+    private function setUrl(string $url = null) : Route
+    {  
+        $this->url = $url ?? route($this->name, $this->params);
         return $this;
     }
 
@@ -102,6 +119,16 @@ class Route extends Foundation implements Navigator
     }
 
     /**
+     * Retorna os parametros
+     *
+     * @return array
+     */
+    private function getParams() : array
+    {
+        return $this->params;
+    }
+
+    /**
      * Carrega as informações principais vindas da 
      * rota do Laravel
      *
@@ -111,6 +138,6 @@ class Route extends Foundation implements Navigator
     {
         $actions = $this->source->getAction();
 
-        $this->setName($actions)->setUrl($actions);
+        $this->setName($actions)->setUrl();
     }
 }

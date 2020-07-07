@@ -9,6 +9,20 @@ use Illuminate\Support\Facades\Route as RoutingFacade;
 
 class RouteMapper
 {
+    private $params = [];
+
+    /**
+     * Define os paramêtros complementares para gerar URL
+     *
+     * @param array $params
+     * @return RouteMapper
+     */
+    private function setParams(array $params) : RouteMapper
+    {
+        $this->params = $params;
+        return $this;
+    }
+
     /**
      * Retorna todas as rotas cadastradas no sistema
      *
@@ -25,8 +39,10 @@ class RouteMapper
      * @param string $name
      * @return Route|null
      */
-    public function find(string $name) :?Route
+    public function find(string $name, array $params = []) :?Route
     {
+        $this->setParams($params);
+
         $result = $this->search('as', $name); 
 
         return $result[0] ?? null;
@@ -65,7 +81,7 @@ class RouteMapper
      */
     private function objectify(RouteEntity $source)
     {
-        $route = new Route($source); 
+        $route = new Route($source, $this->params); 
 
         return $route;
     }
