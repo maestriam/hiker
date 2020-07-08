@@ -19,9 +19,11 @@ class CreateMenuTest extends TestCase
      */
     public function testCreateMenu()
     {
+        $this->createRoutes();
+
         $menu = $this->hiker()
                      ->menu('my-menu')
-                     ->push('home')
+                     ->push('home.test')
                      ->push('blog.index')
                      ->push('blog.store')
                      ->get();
@@ -69,7 +71,7 @@ class CreateMenuTest extends TestCase
     private function createRoutes()
     {
         Route::get('/',[
-            'as' => 'home'
+            'as' => 'home.test'
         ]);
 
         Route::get('/blog', [
