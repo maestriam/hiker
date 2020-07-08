@@ -1,6 +1,6 @@
 {
     "name": "maestriam/hiker",
-    "description": "Create awsome themes for your Laravel projects.",
+    "description": "Create menus and breadcrumbs for you projects.",
     "type": "library",
     "license": "GPL-3.0",
     "require-dev": {
