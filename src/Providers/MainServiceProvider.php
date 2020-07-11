@@ -2,24 +2,21 @@
 
 namespace Maestriam\Hiker\Providers;
 
-use Illuminate\Support\Facades\Route;
+use Maestriam\Hiker\Entities\Hiker;
 use Illuminate\Support\ServiceProvider;
 
 class MainServiceProvider extends ServiceProvider
 {
     /**
-     * Ao iniciar o service provider...
+     * Registra o facade do Hiker
      *
      * @return void
      */
-    public function boot()
+    public function register()
     {
-
-    }
-
-    public function menu(string $name)
-    {
-        //$menu = new Menu();   
+        $this->app->bind('hiker',function() {
+            return new Hiker();
+        });
     }
 }
 

@@ -5,7 +5,7 @@ namespace Maestriam\Hiker\Foundation;
 use Maestriam\Hiker\Entities\Menu;
 use Maestriam\Hiker\Entities\Route;
 use Maestriam\Hiker\Contracts\Navigator;
-use Maestriam\Hiker\Foundation\RouteMapper;
+use Maestriam\Hiker\Traits\Foundation\ManagesRoutes;
 
 /**
  * Classe responsável por encapsular/descapsular os objetos 
@@ -13,7 +13,7 @@ use Maestriam\Hiker\Foundation\RouteMapper;
  */
 class NavEncapsulator
 {
-    private $mapInstance = null;
+    use ManagesRoutes;
 
     /**
      * Retorna a forma encapsulada de um objeto de navegação
@@ -24,20 +24,6 @@ class NavEncapsulator
     public function encapsulate(Navigator $nav) : array
     {
         return $this->rootCapsule($nav);
-    }
-
-    /**
-     * Retorna a instância com as RN's de pesquisa de rota
-     *
-     * @return Map
-     */
-    private function map() : RouteMapper
-    {
-        if ($this->mapInstance == null) {
-            $this->mapInstance = new RouteMapper();
-        }
-
-        return $this->mapInstance;
     }
 
     /**
@@ -71,7 +57,7 @@ class NavEncapsulator
 
         foreach ($collection as $item) {
                                     
-            $capsule = ($item instanceof Menu) ? 
+            $capsule = ($item->isMenu()) ? 
                         $this->menuCapsule($item) :
                         $this->routeCapsule($item);
 

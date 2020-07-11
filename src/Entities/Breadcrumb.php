@@ -4,12 +4,9 @@ namespace Maestriam\Hiker\Entities;
 
 use Maestriam\Hiker\Entities\Foundation;
 use Maestriam\Hiker\Exceptions\RouteNotFoundException;
-use Maestriam\Hiker\Traits\Entities\CustomAttributes;
 
 class Breadcrumb extends Foundation
 {
-    use CustomAttributes;
-
     /**
      * Nome do breadcrumb
      *
@@ -50,7 +47,7 @@ class Breadcrumb extends Foundation
      *
      * @return string
      */
-    private function getName() : string
+    protected function getName() : string
     {
         return $this->name;
     }
@@ -60,7 +57,7 @@ class Breadcrumb extends Foundation
      *
      * @return array
      */
-    private function getCollection() : array
+    protected function getCollection() : array
     {
         return $this->collection;
     }

@@ -18,11 +18,11 @@ class CreateSubMenuTest extends TestCase
              ->menu('submenus')
              ->push('blog.index')
              ->next('blog')
-                ->push('blog.xxx')
-                ->push('blog.store')
+             ->push('blog.xxx')
+             ->push('blog.store')
              ->back()
              ->next('theme')
-                ->push('theme.index')
+             ->push('theme.index')
              ->back();
 
         $menu = $this->hiker()->menu('submenus')->get();

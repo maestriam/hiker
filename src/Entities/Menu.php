@@ -4,14 +4,10 @@ namespace Maestriam\Hiker\Entities;
 
 use Maestriam\Hiker\Entities\Foundation;
 use Maestriam\Hiker\Contracts\Navigator;
-use Maestriam\Hiker\Traits\Entities\SelfKnowledge;
-use Maestriam\Hiker\Traits\Entities\CustomAttributes;
 use Maestriam\Hiker\Exceptions\RouteNotFoundException;
 
 class Menu extends Foundation implements Navigator
 {
-    use SelfKnowledge, CustomAttributes;
-
     /**
      * Nome do menu
      *
@@ -41,17 +37,9 @@ class Menu extends Foundation implements Navigator
      */
     public function __construct(string $name, Menu $parent = null)
     {   
-        $this->flush();
-
         $this->setName($name)
              ->setParent($parent)
              ->load();
-    }
-    
-    public function flush()
-    {
-        $this->cache('menu')->destroy($this->name);
-        return $this;
     }
 
     /**
@@ -80,7 +68,7 @@ class Menu extends Foundation implements Navigator
      *
      * @return string
      */
-    private function getName() : string
+    protected function getName() : string
     {
         return $this->name;
     }
@@ -90,7 +78,7 @@ class Menu extends Foundation implements Navigator
      *
      * @return array
      */
-    private function getCollection() : array
+    protected function getCollection() : array
     {
         return $this->collection;
     }

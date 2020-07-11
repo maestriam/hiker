@@ -4,9 +4,6 @@ namespace Maestriam\Hiker\Traits\Support;
 
 use Maestriam\Hiker\Entities\Hiker;
 
-/**
- * 
- */
 trait Hikeable
 {
     private static $hikerInstance;

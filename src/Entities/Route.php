@@ -5,13 +5,9 @@ namespace Maestriam\Hiker\Entities;
 use Maestriam\Hiker\Contracts\Navigator;
 use Maestriam\Hiker\Entities\Foundation;
 use Illuminate\Routing\Route as RouteSource;
-use Maestriam\Hiker\Traits\Entities\SelfKnowledge;
-use Maestriam\Hiker\Traits\Entities\CustomAttributes;
 
 class Route extends Foundation implements Navigator
 {
-    use SelfKnowledge, CustomAttributes;
-
     /**
      * Rota do Laralve
      *
@@ -113,7 +109,7 @@ class Route extends Foundation implements Navigator
      *
      * @return string
      */
-    private function getName() : string
+    protected function getName() : string
     {
         return $this->name; 
     }
@@ -123,7 +119,7 @@ class Route extends Foundation implements Navigator
      *
      * @return array
      */
-    private function getParams() : array
+    protected function getParams() : array
     {
         return $this->params;
     }

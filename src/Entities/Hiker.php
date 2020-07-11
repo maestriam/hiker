@@ -4,13 +4,18 @@ namespace Maestriam\Hiker\Entities;
 
 use Maestriam\Hiker\Entities\Menu;
 use Maestriam\Hiker\Entities\Breadcrumb;
-use Maestriam\Hiker\Foundation\CacheHandler;
+use Maestriam\Hiker\Traits\Foundation\ManagesCache;
 
 class Hiker
 {
+    use ManagesCache;
+
+    /**
+     * Inicializando
+     */
     public function __construct()
     {
-        $this->purge();
+        $this->cache()->purge();
     }
 
     /**
@@ -36,17 +41,4 @@ class Hiker
     {
         return new Breadcrumb($name);
     }  
-
-    /**
-     * Apaga TODAS as chaves salvas pelo Hiker
-     *
-     * @return Hiker
-     */
-    public function purge() : Hiker
-    {
-        $cache = new CacheHandler();
-        $cache->purge();
-
-        return $this;
-    }
 }
