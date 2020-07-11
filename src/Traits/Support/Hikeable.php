@@ -13,11 +13,10 @@ trait Hikeable
 
     public function hiker()
     {
-        if (isset($hikerInstance)) {
-            return self::$hikerInstance;
+        if (! isset(self::$hikerInstance)) {
+            self::$hikerInstance = new Hiker();
         }
 
-        self::$hikerInstance = new Hiker();
         return self::$hikerInstance;
     }
 }

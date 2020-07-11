@@ -12,20 +12,17 @@ class CreateSubMenuTest extends TestCase
 
     public function testCreateSubMenu()
     {
-        Route::get('/',      ['as' => 'home']);
-        Route::get('/blog',  ['as' => 'blog.index']);
-        Route::get('/theme', ['as' => 'theme.index']);
-        Route::post('/blog', ['as' => 'blog.store']);
+        $this->createRoutes();
 
         $this->hiker()
              ->menu('submenus')
              ->push('blog.index')
              ->next('blog')
-             ->push('blog.xxx')
-             ->push('blog.store')
+                ->push('blog.xxx')
+                ->push('blog.store')
              ->back()
              ->next('theme')
-             ->push('theme.index')
+                ->push('theme.index')
              ->back();
 
         $menu = $this->hiker()->menu('submenus')->get();
@@ -48,5 +45,13 @@ class CreateSubMenuTest extends TestCase
                 }
             }            
         }
+    }
+
+    public function createRoutes()
+    {
+        Route::get('/',      ['as' => 'home']);
+        Route::get('/blog',  ['as' => 'blog.index']);
+        Route::get('/theme', ['as' => 'theme.index']);
+        Route::post('/blog', ['as' => 'blog.store']);
     }
 }

@@ -41,11 +41,19 @@ class Menu extends Foundation implements Navigator
      */
     public function __construct(string $name, Menu $parent = null)
     {   
+        $this->flush();
+
         $this->setName($name)
              ->setParent($parent)
              ->load();
     }
     
+    public function flush()
+    {
+        $this->cache('menu')->destroy($this->name);
+        return $this;
+    }
+
     /**
      * Atalho para resgate de atributos
      *
@@ -55,8 +63,8 @@ class Menu extends Foundation implements Navigator
     public function __get(string $key)
     {          
         return $this->getCustomAttribute($key);
-    }
-    
+    }   
+
     /**
      * Retorna a instância com as propriedades definidas do menu
      *
@@ -84,8 +92,6 @@ class Menu extends Foundation implements Navigator
      */
     private function getCollection() : array
     {
-        $this->cache('menu')->destroy($this->name);
-
         return $this->collection;
     }
 
@@ -252,17 +258,21 @@ class Menu extends Foundation implements Navigator
      *
      * @return void
      */
-    private function load()
+    private function load() : Menu
     {
         $cache = $this->cache('menu')->get($this->name);
 
         if (empty($cache) || ! $cache) {
-            return null;
+            return $this;
         }
 
         $this->custom()->load($cache['attributes']);
-
         $this->parseCollection($cache['collection']);
+
+        if (! empty($this->collection)) {
+        }
+
+        return $this;
     }
         
     /**

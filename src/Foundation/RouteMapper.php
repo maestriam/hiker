@@ -2,13 +2,20 @@
 
 namespace Maestriam\Hiker\Foundation;
 
+use Illuminate\Support\Facades\URL;
 use Maestriam\Hiker\Entities\Route;
 use Illuminate\Routing\RouteCollection; 
+use Illuminate\Support\Facades\Request;
 use Illuminate\Routing\Route as RouteEntity;
 use Illuminate\Support\Facades\Route as RoutingFacade;
 
 class RouteMapper
 {
+    /**
+     * Paramêtros auxiliar para geração da rota
+     *
+     * @var array
+     */
     private $params = [];
 
     /**
@@ -31,6 +38,16 @@ class RouteMapper
     public function all() : RouteCollection
     {
         return RoutingFacade::getRoutes();
+    }
+
+    /**
+     * Retotna a instância da rota atual 
+     *
+     * @return void
+     */
+    public function current()
+    {
+        return RoutingFacade::current();;
     }
 
     /**
