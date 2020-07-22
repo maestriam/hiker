@@ -2,7 +2,6 @@
 
 namespace Maestriam\Hiker\Support;
 
-
 use Illuminate\Support\Facades\Facade;
 
 class Hiker extends Facade

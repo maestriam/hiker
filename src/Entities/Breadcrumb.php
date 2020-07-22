@@ -3,9 +3,10 @@
 namespace Maestriam\Hiker\Entities;
 
 use Maestriam\Hiker\Entities\Foundation;
+use Maestriam\Hiker\Contracts\Navigator;
 use Maestriam\Hiker\Exceptions\RouteNotFoundException;
 
-class Breadcrumb extends Foundation
+class Breadcrumb extends Foundation implements Navigator
 {
     /**
      * Nome do breadcrumb
@@ -77,9 +78,11 @@ class Breadcrumb extends Foundation
     /**
      * Adciona uma nova rota para o breadcrumb
      *
-     * @param string $name
-     * @param array $params
+     * @param string  $name
+     * @param array|null  $params
      * @return Breadcrumb
+     * 
+     * @throws RouteNotFoundException
      */
     public function push(string $name, array $params = []) : Breadcrumb
     {
@@ -96,7 +99,7 @@ class Breadcrumb extends Foundation
     }
 
     /**
-     * 
+     * Adiciona mais uma rota na pilha  
      *
      * @param Route $item
      * @return Breadcrumb
@@ -106,4 +109,16 @@ class Breadcrumb extends Foundation
         $this->collection[] = $route;
         return $this;
     }
+
+    /**
+     * Salva o status atual do breadcrumb no cache
+     *
+     * @return Breadcrumb
+     */
+    private function save() : Breadcrumb
+    {   
+        $cache = $this->capsule()->encapsulate($this);
+
+        return $this;
+    } 
 }

@@ -14,7 +14,7 @@ class CacheHandler
     private $prefix  = 'hiker-';
 
     /**
-     * Undocumented variable
+     * Chave das anotações de chave do Hiker
      *
      * @var string
      */

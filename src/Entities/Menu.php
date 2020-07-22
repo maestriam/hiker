@@ -257,9 +257,6 @@ class Menu extends Foundation implements Navigator
         $this->custom()->load($cache['attributes']);
         $this->parseCollection($cache['collection']);
 
-        if (! empty($this->collection)) {
-        }
-
         return $this;
     }
         
