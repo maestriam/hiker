@@ -29,7 +29,7 @@ class Breadcrumb extends Foundation implements Navigator
      */
     public function __construct(string $name)
     {
-        $this->setName($name);
+        $this->setName($name)->load();
     }
 
     /**
@@ -76,6 +76,45 @@ class Breadcrumb extends Foundation implements Navigator
     }
 
     /**
+     * Carrega
+     *
+     * @return void
+     */
+    private function load() : Breadcrumb
+    {
+        $cache = $this->cache('breadcrumb')->get($this->name);
+
+        if (empty($cache) || ! $cache) {
+            return $this;
+        }
+
+        $this->custom()->load($cache['attributes']);
+        
+        $this->parse($cache['collection']);
+
+        return $this;
+    }
+
+    /**
+     * Percorre todos os registros de rotas
+     * para pegar as rotas 
+     *
+     * @param array $collection
+     * @return void
+     */
+    private function parse(array $collection)
+    {
+        $route = null;
+
+        foreach ($collection as $item) {
+            $route = $this->capsule()->expand($item);
+            $this->add($route);
+        }
+
+        return $this;
+    }
+
+    /**
      * Adciona uma nova rota para o breadcrumb
      *
      * @param string  $name
@@ -94,8 +133,18 @@ class Breadcrumb extends Foundation implements Navigator
         
         $current = $this->map()->current();
 
-        $this->stack($route);
-        return $this;
+        return $this->stack($route);
+    }
+
+    /**
+     * Salva a nova rota no breadcrumb
+     *
+     * @param Route $route
+     * @return Breadcrumb
+     */
+    private function stack(Route $route) : Breadcrumb
+    {
+        return $this->add($route)->save();
     }
 
     /**
@@ -104,7 +153,7 @@ class Breadcrumb extends Foundation implements Navigator
      * @param Route $item
      * @return Breadcrumb
      */
-    private function stack(Route $route) : Breadcrumb
+    private function add(Route $route) : Breadcrumb
     {
         $this->collection[] = $route;
         return $this;
@@ -118,6 +167,8 @@ class Breadcrumb extends Foundation implements Navigator
     private function save() : Breadcrumb
     {   
         $cache = $this->capsule()->encapsulate($this);
+
+        $this->cache('breadcrumb')->update($this->name, $cache);
 
         return $this;
     } 

@@ -32,7 +32,7 @@ class NavEncapsulator
      *
      * @return array
      */
-    private function rootCapsule(Menu $root) : array
+    private function rootCapsule(Navigator $root) : array
     {
         $collection = $this->collectionCapsule($root->collection);
         
