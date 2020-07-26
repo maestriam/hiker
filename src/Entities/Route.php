@@ -2,12 +2,11 @@
 
 namespace Maestriam\Hiker\Entities;
 
+use stdClass;
 use Maestriam\Hiker\Contracts\Navigator;
 use Maestriam\Hiker\Entities\Foundation;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Routing\Route as RouteSource;
 use Illuminate\Support\Facades\Route as RouteFacade;
-use stdClass;
 
 class Route extends Foundation implements Navigator
 {
