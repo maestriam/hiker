@@ -3,6 +3,7 @@
 namespace Maestriam\Hiker\Entities;
 
 use stdClass;
+use Exception;
 use Maestriam\Hiker\Contracts\Navigator;
 use Maestriam\Hiker\Entities\Foundation;
 use Illuminate\Routing\Route as RouteSource;
@@ -78,8 +79,12 @@ class Route extends Foundation implements Navigator
         foreach ($params as $k => $v) {            
             
             $param = $this->prepare($k, $v);     
+
+            if (! $param) {
+                continue;
+            }
             
-            $this->stack($param)->note($param->key, $param->value);
+            $this->stack($param)->note($param);
         }
 
         return $this;
@@ -95,16 +100,48 @@ class Route extends Foundation implements Navigator
      * @param mixed $value
      * @return stdClass
      */
-    private function prepare($key, $value) : stdClass
+    private function prepare($key, $value) : ?stdClass
     {
         if (! $this->isAssocArray($key)) {
-            $key   = $value;
-            $value = ($this->isCurrent()) ? request($key) : $this->last($key);                                     
+            return $this->deducedParam($value);
         }
         
         $obj = ['key' => $key, 'value' => $value];
         
         return (object) $obj;                
+    }
+    
+    /**
+     * Retorna um parâmetro com o valor deduzido
+     * Se não conseguir encontrar, retorna nulo
+     *
+     * @param string $key
+     * @return stdClass|null
+     */
+    private function deducedParam(string $key) : ?stdClass
+    {
+        $value = $this->deduce($key);         
+        
+        if ($value) {
+            return (object) ['key' => $key, 'value' => $value];
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Tenta deduzir o valor para um parâmetro informado 
+     *
+     * @param string $key
+     * @return string
+     */
+    private function deduce(string $key) : ?string
+    {
+        if ($this->isCurrent()) {
+            return request($key);
+        }
+
+        return $this->last($key);  
     }
 
     /**
@@ -127,9 +164,9 @@ class Route extends Foundation implements Navigator
      * Retorna o último o valor de um parâmetro visto
      *
      * @param string $key
-     * @return void
+     * @return string
      */
-    private function last(string $key)
+    private function last(string $key) : ?string
     {
         return $this->session()->tag($this->name)->get($key);
     }
@@ -140,13 +177,13 @@ class Route extends Foundation implements Navigator
      * @param string $key
      * @return string|null
      */
-    private function note(string $key, $value = null) 
+    private function note(stdClass $param) 
     {
-        if (! $value)  return null;
+        $key   = $param->key;
+        $value = $param->value;
 
         return $this->session()->tag($this->name)->put($key, $value);
     }
-
 
     /**
      * Verifica se o parâmetro passado é um array associativo
@@ -190,14 +227,20 @@ class Route extends Foundation implements Navigator
     }
 
     /**
-     * Define a URL da rota
+     * Define a URL da rota com os parâmetros processados
+     * Caso não consiga, define a url como nulo
      *
      * @param string $url
      * @return Route
      */
-    private function setUrl(string $url = null) : Route
+    private function setUrl() : Route
     {  
-        $this->url = $url ?? route($this->name, $this->params);
+        try {        
+            $this->url = route($this->name, $this->params);
+        } catch (Exception $e) {
+            $this->url = null;
+        } 
+
         return $this;
     }
 
@@ -212,7 +255,7 @@ class Route extends Foundation implements Navigator
     }
 
     /**
-     * Retorna os parametros
+     * Retorna os parametros depois de processados
      *
      * @return array
      */

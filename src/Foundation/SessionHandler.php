@@ -14,14 +14,14 @@ class SessionHandler
     private $prefix = 'hiker-session';
 
     /**
-     * 
+     * Adiciona uma categoria para
      *
      * @var string
      */
     private $tag = null;
     
     /**
-     * 
+     * Adiciona uma categoria para a sessão
      *
      * @param string $tag
      * @return SessionHandler
@@ -33,13 +33,13 @@ class SessionHandler
     }
 
     /**
-     * Undocumented function
+     * Adiciona um valor para sessão de acordo com a chave
      *
      * @param string $key
      * @param mixed $value
      * @return boolean
      */
-    public function put(string $key, $value) 
+    public function put(string $key, string $value) 
     {
         $key = $this->key($key);
         
@@ -52,7 +52,7 @@ class SessionHandler
      * @param string $key
      * @return void
      */
-    public function get(string $key)
+    public function get(string $key) : ?string
     {
         $key = $this->key($key);
     
