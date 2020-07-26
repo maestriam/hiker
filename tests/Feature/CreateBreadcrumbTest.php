@@ -13,15 +13,14 @@ class CreateBreadcumbTest extends TestCase
     public function testCreateBreadcrumb()
     {
         Route::get('/', [
-            'as'  => 'test.index',
+            'as' => 'test.index',
         ]);
 
         Route::get('/show', [
-            'as'  => 'test.show',
+            'as' => 'test.show',
         ]);
 
-        $breadcrumb = $this->hiker()
-                           ->breadcrumb('test.show');            
+        $breadcrumb = $this->hiker()->breadcrumb('test.show');            
     
         $breadcrumb->push('test.index')
                    ->push('test.show');

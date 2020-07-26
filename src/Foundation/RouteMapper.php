@@ -2,10 +2,8 @@
 
 namespace Maestriam\Hiker\Foundation;
 
-use Illuminate\Support\Facades\URL;
 use Maestriam\Hiker\Entities\Route;
-use Illuminate\Routing\RouteCollection; 
-use Illuminate\Support\Facades\Request;
+use Illuminate\Routing\RouteCollection;
 use Illuminate\Routing\Route as RouteEntity;
 use Illuminate\Support\Facades\Route as RoutingFacade;
 
@@ -47,7 +45,7 @@ class RouteMapper
      */
     public function current()
     {
-        return RoutingFacade::current();;
+        return RoutingFacade::current();
     }
 
     /**

@@ -11,7 +11,7 @@ class CacheHandler
      *
      * @var string
      */
-    private $prefix  = 'hiker-';
+    private $prefix  = 'hiker-cache-';
 
     /**
      * Chave das anotações de chave do Hiker
