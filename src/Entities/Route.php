@@ -12,21 +12,21 @@ use stdClass;
 class Route extends Foundation implements Navigator
 {
     /**
-     * Rota do Laralve
+     * Objeto Laravel com as propriedades da rota
      *
      * @var RouteSource
      */
     private $source;
 
     /**
-     * Undocumented variable
+     * Parâmetros necessários para montar a URL da rota
      *
      * @var array
      */
     private $params = [];
 
     /**
-     * Apelido atribuído a rota
+     * Nome para identificação da rota
      *
      * @var string
      */
@@ -69,7 +69,7 @@ class Route extends Foundation implements Navigator
     }
 
     /**
-     * Undocumented function
+     * Define os parâmetros necessários para montar a URL da rota
      *
      * @param array $params
      * @return Route
@@ -87,7 +87,10 @@ class Route extends Foundation implements Navigator
     }
 
     /**
-     * Verifica se a rota precisa 
+     * Prepara os parâmetros necessários para montar a rota
+     * Se algum paramêtro passado não tiver o valor definido,
+     * verifica qual foi o ultimo valor recebido ou se o valor está
+     * na URL atual
      *
      * @param mixed $key
      * @param mixed $value
@@ -100,16 +103,13 @@ class Route extends Foundation implements Navigator
             $value = ($this->isCurrent()) ? request($key) : $this->last($key);                                     
         }
         
-        $obj = [
-            'key'   => $key,
-            'value' => $value
-        ];
+        $obj = ['key' => $key, 'value' => $value];
         
         return (object) $obj;                
     }
 
     /**
-     * 
+     * Adiciona um novo item para a pilha de parâmetros
      *
      * @param string $key
      * @param mixed $value
@@ -117,15 +117,15 @@ class Route extends Foundation implements Navigator
      */
     private function stack(stdClass $param) : Route
     {
-       $key   = $param->key;
-       $value = $param->value;
+        $key   = $param->key;
+        $value = $param->value;
 
         $this->params[$key] = $value;
         return $this;
     }
 
     /**
-     * Undocumented function
+     * Retorna o último o valor de um parâmetro visto
      *
      * @param string $key
      * @return void
@@ -143,16 +143,15 @@ class Route extends Foundation implements Navigator
      */
     private function note(string $key, $value = null) 
     {
-        if (! $value) {
-            return null;
-        }
+        if (! $value)  return null;
 
         return $this->session()->tag($this->name)->put($key, $value);
     }
 
 
     /**
-     * Verifica se o parâmetro passado é 
+     * Verifica se o parâmetro passado é um array associativo
+     * Se for, significa que foi passado o paramêtro par-valor
      *
      * @param array $array
      * @return boolean
@@ -221,19 +220,5 @@ class Route extends Foundation implements Navigator
     protected function getParams() : array
     {
         return $this->params;
-    }
-
-    /**
-     * Carrega as informações principais vindas da 
-     * rota do Laravel
-     *
-     * @return void
-     */
-    private function load()
-    {
-        $actions = $this->source->getAction();
-
-        // $this->setName($actions)->setUrl();
-
     }
 }
