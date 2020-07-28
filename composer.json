@@ -13,9 +13,6 @@
             "email": "giuguitar@gmail.com"
         }
     ],
-    "require": {
-        "laravel/framework": "^6.0"
-    },
     "autoload-dev": {
         "psr-4": {
             "Maestriam\\Hiker\\Tests\\": "tests/"
