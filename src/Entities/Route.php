@@ -53,9 +53,10 @@ class Route extends Foundation implements Navigator
      */
     public function __get(string $key)
     {
-        return $this->getCustomAttribute($key);
+        return $this->getCustomAttribute($key) ?? 
+               $this->source->getAction($key);
     }
-        
+
     /**
      * Define qual as fontes de rotas do Laravel para o objeto
      *
@@ -206,8 +207,7 @@ class Route extends Foundation implements Navigator
     private function setName($name = null) :  Route
     {
         if (! $name) {
-            $actions = $this->source->getAction();
-            $name    = $actions['as'];
+            $name = $this->source->getAction('as');
         }
 
         $this->name = $name;
