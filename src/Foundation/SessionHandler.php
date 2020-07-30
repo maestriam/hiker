@@ -3,6 +3,7 @@
 namespace Maestriam\Hiker\Foundation;
 
 use Illuminate\Support\Facades\Session;
+use Maestriam\Hiker\Exceptions\SessionNotInitializedException;
 
 class SessionHandler
 {   
@@ -19,7 +20,29 @@ class SessionHandler
      * @var string
      */
     private $tag = null;
+
+    public function __construct()
+    {
+        $this->checkSession();
+    }
     
+    /**
+     * Verifica se a sessão está iniciada
+     * e funcionando corretamente
+     *
+     * @return void
+     */
+    private function checkSession()
+    {
+        Session::put('hiker-session', 'start');
+        
+        if (! Session::has('hiker-session')) {
+            throw new SessionNotInitializedException();
+        }
+
+        Session::forget('hiker-session');
+    }
+
     /**
      * Adiciona uma categoria para a sessão
      *

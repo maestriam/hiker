@@ -2,14 +2,12 @@
 
 namespace Maestriam\Hiker\Entities;
 
-use stdClass;
 use Exception;
 use Maestriam\Hiker\Contracts\Navigator;
 use Maestriam\Hiker\Entities\Foundation;
 use Illuminate\Routing\Route as RouteSource;
 use Maestriam\Hiker\Traits\Foundation\ManagesUri;
 use Illuminate\Support\Facades\Route as RouteFacade;
-use Maestriam\Hiker\Exceptions\InvalidParamRouteException;
 
 class Route extends Foundation implements Navigator
 {
@@ -86,15 +84,15 @@ class Route extends Foundation implements Navigator
      */
     private function setParams(array $params) : Route
     {
-        foreach ($params as $k => $v) {            
+        foreach ($this->uri as $key) {            
             
-            $param = $this->prepare($k, $v);     
+            $value = $params[$key] ?? $this->deduce($key);
 
-            if (! $param) {
+            if (! $value) {
                 continue;
             }
-            
-            $this->stack($param)->note($param);
+
+            $this->stack($key, $value)->note($key, $value);
         }
 
         return $this;
@@ -125,45 +123,6 @@ class Route extends Foundation implements Navigator
     {
         return (in_array($key, $this->uri));
     }
-
-    /**
-     * Prepara os parâmetros necessários para montar a rota
-     * Se algum paramêtro passado não tiver o valor definido,
-     * verifica qual foi o ultimo valor recebido ou se o valor está
-     * na URL atual
-     *
-     * @param mixed $key
-     * @param mixed $value
-     * @return stdClass
-     */
-    private function prepare($key, $value) : ?stdClass
-    {
-        if (! $this->isAssocArray($key)) {
-            return $this->deducedParam($value);
-        }
-        
-        $obj = ['key' => $key, 'value' => $value];
-        
-        return (object) $obj;                
-    }
-    
-    /**
-     * Retorna um parâmetro com o valor deduzido
-     * Se não conseguir encontrar, retorna nulo
-     *
-     * @param string $key
-     * @return stdClass|null
-     */
-    private function deducedParam(string $key) : ?stdClass
-    {
-        $value = $this->deduce($key);         
-        
-        if (! $value) {
-            return null;
-        }
-        
-        return (object) ['key' => $key, 'value' => $value];
-    }
     
     /**
      * Tenta deduzir o valor para um parâmetro informado 
@@ -187,15 +146,9 @@ class Route extends Foundation implements Navigator
      * @param mixed $value
      * @return void
      */
-    private function stack(stdClass $param) : Route
+    private function stack(string $key, $value) : Route
     {
-        $key = $param->key;
-
-        if (! $this->paramExists($key)) {
-            throw new InvalidParamRouteException($key, $this->name);
-        }
-
-        $this->params[$key] = $param->value;
+        $this->params[$key] = $value;
         return $this;
     }
 
@@ -216,11 +169,8 @@ class Route extends Foundation implements Navigator
      * @param string $key
      * @return string|null
      */
-    private function note(stdClass $param) 
+    private function note(string $key, $value) 
     {
-        $key   = $param->key;
-        $value = $param->value;
-
         return $this->session()->tag($this->name)->put($key, $value);
     }
 
