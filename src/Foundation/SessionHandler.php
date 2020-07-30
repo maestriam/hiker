@@ -93,7 +93,7 @@ class SessionHandler
         $pre = ($this->tag) ? $this->prefix . '-' . $this->tag : $this->prefix;
         $key = $pre . '-' . $name;
         
-        return $this->normalize($name);
+        return $this->normalize($key);
     }
 
     /**
