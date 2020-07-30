@@ -18,7 +18,7 @@ trait ManagesRoutes
      *
      * @return RouteMapper
      */
-    public function map() : RouteMapper
+    public final function map() : RouteMapper
     {
         if (! self::$mapInstance) {
             self::$mapInstance = new RouteMapper();

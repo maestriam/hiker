@@ -7,10 +7,14 @@ use Exception;
 use Maestriam\Hiker\Contracts\Navigator;
 use Maestriam\Hiker\Entities\Foundation;
 use Illuminate\Routing\Route as RouteSource;
+use Maestriam\Hiker\Traits\Foundation\ManagesUri;
 use Illuminate\Support\Facades\Route as RouteFacade;
+use Maestriam\Hiker\Exceptions\InvalidParamRouteException;
 
 class Route extends Foundation implements Navigator
 {
+    use ManagesUri;
+
     /**
      * Objeto Laravel com as propriedades da rota
      *
@@ -31,6 +35,9 @@ class Route extends Foundation implements Navigator
      * @var string
      */
     private $name = '';
+
+
+    private $uri = [];
     
     /**
      * Inicializa todos os atributos principais
@@ -41,6 +48,7 @@ class Route extends Foundation implements Navigator
     {
         $this->setSource($source)
              ->setName()
+             ->parseUri()
              ->setParams($params)
              ->setUrl();
     }
@@ -66,6 +74,7 @@ class Route extends Foundation implements Navigator
     private function setSource(RouteSource $source = null) : Route
     {
         $this->source = $source;
+
         return $this;
     }
 
@@ -89,6 +98,32 @@ class Route extends Foundation implements Navigator
         }
 
         return $this;
+    }
+
+    /**
+     * Interpreta os valores passados na URI
+     * para definir os parâmetros na rota
+     *
+     * @return void
+     */
+    public function parseUri() : Route
+    {
+        $uri = $this->source->uri;
+
+        $this->uri = $this->uri()->parse($uri);
+        
+        return $this;
+    }
+
+    /**
+     * Verifica se existe uma chave 
+     *
+     * @param string $key
+     * @return boolean
+     */
+    private function paramExists(string $key) : bool
+    {
+        return (in_array($key, $this->uri));
     }
 
     /**
@@ -123,11 +158,11 @@ class Route extends Foundation implements Navigator
     {
         $value = $this->deduce($key);         
         
-        if ($value) {
-            return (object) ['key' => $key, 'value' => $value];
+        if (! $value) {
+            return null;
         }
         
-        return null;
+        return (object) ['key' => $key, 'value' => $value];
     }
     
     /**
@@ -154,10 +189,13 @@ class Route extends Foundation implements Navigator
      */
     private function stack(stdClass $param) : Route
     {
-        $key   = $param->key;
-        $value = $param->value;
+        $key = $param->key;
 
-        $this->params[$key] = $value;
+        if (! $this->paramExists($key)) {
+            throw new InvalidParamRouteException($key, $this->name);
+        }
+
+        $this->params[$key] = $param->value;
         return $this;
     }
 
