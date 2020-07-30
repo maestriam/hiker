@@ -85,13 +85,25 @@ class SessionHandler
     /**
      * Retorna a chave para adicionar/resgatar dados da sessão
      *
+     * @param string $name
+     * @return string
+     */
+    private function key(string $name) : string
+    {
+        $pre = ($this->tag) ? $this->prefix . '-' . $this->tag : $this->prefix;
+        $key = $pre . '-' . $name;
+        
+        return $this->normalize($name);
+    }
+
+    /**
+     * Retorna a chave para sessão sem caracteres indesejados
+     *
      * @param string $key
      * @return string
      */
-    private function key(string $key) : string
+    private function normalize(string $key) : string
     {
-        $pre = ($this->tag) ? $this->prefix . '.' . $this->tag : $this->prefix;
-        
-        return $pre . '.' . $key;
+        return str_replace('.', '', $key);
     }
 }
