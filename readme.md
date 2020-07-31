@@ -23,35 +23,34 @@ composer require maestriam/hiker
 
 ## Getting Started
 
-**Preparing routes**
+**Preparing routes**  
 
-Let's start creating some routes normally using Laravel Routes. 
+Let's start creating some routes normally using Laravel Routes.  
+You must declaring `as` and `uses` params. 
+
+``` php
+    Route::get('/test/edit/{id}', [
+        'as'    => 'test.edit',
+        'uses'  => 'TestController@edit'
+    ]);
+```
+
+**Optional attributes**
+
 Optionally, you can add others params into yout route
-
 ``` php
     Route::get('/test', [
         'as'    => 'test.index',
+        'uses'  => 'TestController@index'
         'icon'  => 'flag',
         'label' => 'My Route Index',
         'desc'  => 'A common index route' 
-    ]);
-
-    Route::get('/test/view/{id}/{foo?}', [
-        'as'    => 'test.view',
-        'icon'  => 'flag',
-        'label' => 'My Route View',
-        'desc'  => 'A common view route' 
-    ]);
-
-    Route::get('/test/edit/{id}', [
-        'as'    => 'test.edit',
-        'icon'  => 'flag'
     ]);
 ```
 
 ## Menu
 
-Create a new menu
+**Create a new menu**
 ``` php
     $menu = Hiker::menu('test-menu');
 ```
@@ -112,11 +111,20 @@ To add routes into breadcrumb, just call function `push` passing route name as p
 You can pass others parameters for construction of route
 
 ``` php
-
     Hiker::breadcrumb('my-breadcrumb')
          ->push('test.index')
          ->push('test.index', ['id' => 1]);
-
 ```
+
+
+**Get routes**  
+
+To get added routes, just access `collection` attribute:
+``` php
+    $breadcrumb = Hiker::breadcrumb('my-breadcrumb');
+
+    $breadcrumb->collection;
+```
+
 <br></br>  
 Created by [Giuliano Sampaio](https://github.com/giusampaio) with ❤️ and 🍺!
