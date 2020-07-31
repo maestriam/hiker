@@ -23,13 +23,20 @@ class Breadcrumb extends Foundation implements Navigator
     private $collection = [];
 
     /**
+     * Rota que possuí o mesmo nome do bradcrumb
+     *
+     * @var Route
+     */
+    private $namesake = null;
+
+    /**
      * Carrega os atributos e funções principais
      *
      * @param string $name
      */
     public function __construct(string $name)
     {
-        $this->setName($name)->load();
+        $this->setName($name)->findNamesake()->load();
     }
 
     /**
@@ -41,6 +48,18 @@ class Breadcrumb extends Foundation implements Navigator
     public function __get(string $key)
     {          
         return $this->getCustomAttribute($key);
+    }
+    
+    /**
+     * Tenta encontrar alguma rota homônima ao breadcrumb
+     *
+     * @return Breadcrumb
+     */
+    private function findNamesake() : Breadcrumb
+    {
+        $this->namesake = $this->map()->find($this->name);
+
+        return $this;
     }
 
     /**
@@ -76,7 +95,7 @@ class Breadcrumb extends Foundation implements Navigator
     }
 
     /**
-     * Carrega
+     * Carrega as rotas 
      *
      * @return void
      */
@@ -125,15 +144,24 @@ class Breadcrumb extends Foundation implements Navigator
      */
     public function push(string $name, array $params = []) : Breadcrumb
     {
-        $route = $this->map()->find($name, $params);
-        
+        $route = $this->route($name, $params);   
+
         if (! $route) {
             throw new RouteNotFoundException($name);
         }
         
-        $current = $this->map()->current();
-
         return $this->stack($route);
+    }
+
+    /**
+     * Tenta encontra uma rota de acordo com o nome
+     *
+     * @param string $name
+     * @return Route
+     */
+    private function route(string $name, array $params = []) : ?Route
+    {
+        return  $this->map()->find($name, $params);
     }
 
     /**
@@ -144,7 +172,28 @@ class Breadcrumb extends Foundation implements Navigator
      */
     private function stack(Route $route) : Breadcrumb
     {
-        return $this->add($route)->save();
+        if (! empty($this->collection)) {
+            array_pop($this->collection);
+        }
+
+        return $this->add($route)->setLast()->update();
+    }
+
+    /**
+     * Se o nome do breadcrumb for do mesmo nome de uma rota,
+     * adiciona ele como último elemento do breadcrumb
+     *
+     * @return Breadcrumb
+     */
+    public function setLast() : Breadcrumb
+    {
+        $route = $this->route($this->name);
+
+        if (! $route) {
+            return $this;
+        }
+        
+        return $this->add($route);
     }
 
     /**
@@ -164,7 +213,7 @@ class Breadcrumb extends Foundation implements Navigator
      *
      * @return Breadcrumb
      */
-    private function save() : Breadcrumb
+    private function update() : Breadcrumb
     {   
         $cache = $this->capsule()->encapsulate($this);
 

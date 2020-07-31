@@ -56,7 +56,7 @@ class NavEncapsulator
         $bottle  = [];
 
         foreach ($collection as $item) {
-                                    
+        
             $capsule = ($item->isMenu()) ? 
                         $this->menuCapsule($item) :
                         $this->routeCapsule($item);
