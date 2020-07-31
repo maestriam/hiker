@@ -176,7 +176,7 @@ class Breadcrumb extends Foundation implements Navigator
             array_pop($this->collection);
         }
 
-        return $this->add($route)->setLast()->update();
+        return $this->add($route)->last()->update();
     }
 
     /**
@@ -185,15 +185,13 @@ class Breadcrumb extends Foundation implements Navigator
      *
      * @return Breadcrumb
      */
-    public function setLast() : Breadcrumb
+    public function last() : Breadcrumb
     {
-        $route = $this->route($this->name);
-
-        if (! $route) {
+        if (! $this->namesake) {
             return $this;
         }
         
-        return $this->add($route);
+        return $this->add($this->namesake);
     }
 
     /**
