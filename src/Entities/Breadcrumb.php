@@ -36,7 +36,10 @@ class Breadcrumb extends Foundation implements Navigator
      */
     public function __construct(string $name)
     {
-        $this->setName($name)->findNamesake()->addLast()->load();
+        $this->setName($name)
+             ->findNamesake()
+             ->loadCache()
+             ->checkStack();
     }
 
     /**
@@ -58,7 +61,6 @@ class Breadcrumb extends Foundation implements Navigator
     private function findNamesake() : Breadcrumb
     {
         $this->namesake = $this->map()->find($this->name);
-
         return $this;
     }
 
@@ -99,7 +101,7 @@ class Breadcrumb extends Foundation implements Navigator
      *
      * @return void
      */
-    private function load() : Breadcrumb
+    private function loadCache() : Breadcrumb
     {
         $cache = $this->cache('breadcrumb')->get($this->name);
 
@@ -112,6 +114,32 @@ class Breadcrumb extends Foundation implements Navigator
         $this->parse($cache['collection']);
 
         return $this;
+    }
+
+    /**
+     * Verifica se a coleção está vazia. 
+     * Se tiver e for um breadcrumb homonimo a uma rota, adiciona a 
+     * rota para a coleção
+     *
+     * @return void
+     */
+    private function checkStack() : Breadcrumb
+    {
+        if (! empty($this->collection)) {
+            return $this;
+        }
+
+        return $this->addLast();
+    }
+
+    /**
+     * Verifica se o breadcrumb em questão é homonimo à alguma rota
+     *
+     * @return boolean
+     */
+    private function isNamesake() : bool
+    {
+        return ($this->namesake) ? true : false;
     }
 
     /**
@@ -172,7 +200,7 @@ class Breadcrumb extends Foundation implements Navigator
      */
     private function stack(Route $route) : Breadcrumb
     {
-        if (! empty($this->collection)) {
+        if ($this->isNamesake()) {
             array_pop($this->collection);
         }
 
@@ -191,7 +219,9 @@ class Breadcrumb extends Foundation implements Navigator
             return $this;
         }
         
-        return $this->add($this->namesake);
+        $this->add($this->namesake);
+
+        return $this;
     }
 
     /**

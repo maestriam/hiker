@@ -91,6 +91,27 @@ class CreateBreadcumbTest extends TestCase
     }
 
     /**
+     * Verifica a criação e a recuperação de itens no breadcrumb
+     * ao longo da navegação do sistema
+     *
+     * @return void
+     */
+    public function testNavigation()
+    {
+        $this->createRoutes();
+
+        $breadcrumb = $this->hiker()
+                           ->breadcrumb('test.show')
+                           ->push('test.index'); 
+
+        $this->get('/show');
+
+        $collection = $this->hiker()->breadcrumb()->collection;
+
+        $this->assertCount(2, $collection);
+    }
+
+    /**
      * Verifica se é possível criar um breadcrumb com um nome qualquer,
      * sem vínculo com qualquer rota
      *
