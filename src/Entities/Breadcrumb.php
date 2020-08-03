@@ -95,7 +95,7 @@ class Breadcrumb extends Foundation implements Navigator
     }
 
     /**
-     * Carrega as rotas 
+     * Carrega as rotas vindas do cache
      *
      * @return void
      */

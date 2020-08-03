@@ -8,6 +8,7 @@ use Maestriam\Hiker\Entities\Foundation;
 use Illuminate\Routing\Route as RouteSource;
 use Maestriam\Hiker\Traits\Foundation\ManagesUri;
 use Illuminate\Support\Facades\Route as RouteFacade;
+use Maestriam\Hiker\Exceptions\RouteHasNoNameException;
 
 class Route extends Foundation implements Navigator
 {
@@ -192,10 +193,12 @@ class Route extends Foundation implements Navigator
      * @param string $name
      * @return Route
      */
-    private function setName($name = null) :  Route
+    private function setName() :  Route
     {
+        $name = $this->source->getAction('as');
+
         if (! $name) {
-            $name = $this->source->getAction('as');
+            throw new RouteHasNoNameException($this->source->uri);
         }
 
         $this->name = $name;
@@ -237,7 +240,7 @@ class Route extends Foundation implements Navigator
      *
      * @return string
      */
-    protected function getName() : string
+    protected function getName() : ?string
     {
         return $this->name; 
     }

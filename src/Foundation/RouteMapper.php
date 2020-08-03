@@ -41,11 +41,17 @@ class RouteMapper
     /**
      * Retotna a instância da rota atual 
      *
-     * @return void
+     * @return \Maestriam\Hiker\Entities\Route
      */
-    public function current()
+    public function current() : ?Route
     {
-        return RoutingFacade::current();
+        $source = RoutingFacade::current();
+
+        if (! $source) {
+            return null;
+        }
+
+        return $this->objectify($source);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace Maestriam\Hiker\Tests\Feature;
 
 use Tests\TestCase;
 use Illuminate\Support\Facades\Route;
+use Maestriam\Hiker\Entities\Breadcrumb;
 use Maestriam\Hiker\Traits\Support\Hikeable;
 use Maestriam\Hiker\Exceptions\RouteNotFoundException;
 
@@ -126,6 +127,30 @@ class CreateBreadcumbTest extends TestCase
         $breadcrumb = $this->hiker()->breadcrumb('Foo');
 
         $this->assertCount(0, $breadcrumb->collection);
+    }
+
+    /**
+     * Verifica se é possível resgatar um breadcrumb de acordo 
+     * com a rota atual
+     *
+     * @return void
+     */
+    public function testCurrentBreadcrumb()
+    {
+        $this->createRoutes();
+
+        $this->get('/view/1');     
+        
+        $breadcrumb = $this->hiker()->breadcrumb();
+
+        $this->contestBreadcrumb($breadcrumb);
+        $this->assertCount(1, $breadcrumb->collection);
+    }
+
+
+    private function contestBreadcrumb($breadcrumb)
+    {
+        $this->assertInstanceOf(Breadcrumb::class,  $breadcrumb);
     }
 
     /**
